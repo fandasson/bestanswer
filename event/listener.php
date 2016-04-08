@@ -17,6 +17,11 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 */
 class listener implements EventSubscriberInterface
 {
+	/**
+	 * Target user data
+	 */
+	private $bestanswer = array();
+
 	/** @var \phpbb\auth\auth */
 	protected $auth;
 
@@ -102,6 +107,7 @@ class listener implements EventSubscriberInterface
 			'core.viewforum_modify_topicrow'				=> 'modify_topicrow_tpl_ary',
 			'core.viewtopic_assign_template_vars_before'	=> 'viewtopic_assign_template_vars_before',
 			'core.viewtopic_cache_user_data'				=> 'viewtopic_cache_user_data',
+			'core.viewtopic_get_post_data'					=> 'viewtopic_get_post_data',
 			'core.viewtopic_modify_post_row'				=> 'viewtopic_modify_post_row',
 		);
 	}
@@ -298,6 +304,31 @@ class listener implements EventSubscriberInterface
 		$event['user_cache_data'] = $user_cache_data;
 	}
 
+    public function viewtopic_get_post_data($event)
+    {
+        $topic_bestanswer = $event['topic_data']['bestanswer_id'];
+
+		// only run this query if the topic has a best answer
+		if (!empty($topic_bestanswer))
+		{
+			$sql = 'SELECT p.*, u.user_id, u.username, u.user_colour
+				FROM ' . POSTS_TABLE . ' p, ' . USERS_TABLE . ' u
+				WHERE p.post_id = ' . (int) $topic_bestanswer . '
+					AND p.poster_id = u.user_id';
+			$result = $this->db->sql_query($sql);
+			while ($post = $this->db->sql_fetchrow($result))
+			{
+				$bbcode_options = (($post['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
+					(($post['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) +
+					(($post['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
+				$this->bestanswer['ANSWER'] = generate_text_for_display($post['post_text'], $post['bbcode_uid'], $post['bbcode_bitfield'], $bbcode_options);
+				$this->bestanswer['ANSWER_AUTHOR_FULL'] = get_username_string('full', $post['user_id'], $post['username'], $post['user_colour']);
+				$this->bestanswer['ANSWER_DATE'] = $this->user->format_date($post['post_time']);
+			}
+			$this->db->sql_freeresult($result);
+		}
+    }
+
 	public function viewtopic_modify_post_row($event)
 	{
 		$poster_id = $event['poster_id'];
@@ -320,23 +351,11 @@ class listener implements EventSubscriberInterface
 		}
 
 		// Only pull answer post text if a bestanswer_id is supplied and the post_id is the first post in a topic
-		if ($topic_data['bestanswer_id'] && ($topic_data['topic_first_post_id'] == $row['post_id']))
+		if (sizeof($this->bestanswer) && ($topic_data['topic_first_post_id'] == $row['post_id']))
 		{
-			$sql = 'SELECT p.*, u.user_id, u.username, u.user_colour
-				FROM ' . POSTS_TABLE . ' p, ' . USERS_TABLE . ' u
-				WHERE p.post_id = ' . (int) $topic_data['bestanswer_id'] . '
-					AND p.poster_id = u.user_id';
-			$result = $this->db->sql_query($sql);
-			while ($post = $this->db->sql_fetchrow($result))
-			{
-				$bbcode_options = (($post['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
-					(($post['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) +
-					(($post['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
-				$post_row['ANSWER'] = generate_text_for_display($post['post_text'], $post['bbcode_uid'], $post['bbcode_bitfield'], $bbcode_options);
-				$post_row['ANSWER_AUTHOR_FULL'] = get_username_string('full', $post['user_id'], $post['username'], $post['user_colour']);
-				$post_row['ANSWER_DATE'] = $this->user->format_date($post['post_time']);
-			}
-			$this->db->sql_freeresult($result);
+			$post_row['ANSWER'] = $this->bestanswer['ANSWER'];
+			$post_row['ANSWER_AUTHOR_FULL'] = $this->bestanswer['ANSWER_AUTHOR_FULL'];
+			$post_row['ANSWER_DATE'] =  $this->bestanswer['ANSWER_DATE'];
 		}
 
 		// Add the topics answered search URL to the mini profile in viewtopic
