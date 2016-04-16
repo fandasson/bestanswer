@@ -302,9 +302,9 @@ class listener implements EventSubscriberInterface
 		$event['user_cache_data'] = $user_cache_data;
 	}
 
-    public function viewtopic_get_post_data($event)
-    {
-        $topic_data = $event['topic_data'];
+	public function viewtopic_get_post_data($event)
+	{
+		$topic_data = $event['topic_data'];
 
 		// Only run this query if the topic has a best answer
 		if (!empty($topic_data['bestanswer_id']))
@@ -325,7 +325,7 @@ class listener implements EventSubscriberInterface
 			}
 			$this->db->sql_freeresult($result);
 		}
-    }
+	}
 
 	public function viewtopic_modify_post_row($event)
 	{
