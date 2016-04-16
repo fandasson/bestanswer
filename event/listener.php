@@ -42,7 +42,7 @@ class listener implements EventSubscriberInterface
 	protected $php_ext;
 
 	/** @var array answer */
-	private $answer = array;
+	private $answer = array();
 
 	/**
 	* Constructor
