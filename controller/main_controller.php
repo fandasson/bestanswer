@@ -58,6 +58,7 @@ class main_controller
 	{
 		$post_id = $this->request->variable('p', 0);
 
+		// Grab all the data necessary for error checking
 		$sql_array = array(
 			'SELECT'	=> 't.*, f.*, p.*, u.user_id',
 
@@ -112,6 +113,7 @@ class main_controller
 
 					if ($action == 'mark_answer')
 					{
+						// If a best answer is already set, we need to update the user's answer count first
 						if ($topic_data['bestanswer_id'])
 						{
 							$sql = 'SELECT poster_id

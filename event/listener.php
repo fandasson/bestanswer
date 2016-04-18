@@ -170,6 +170,7 @@ class listener implements EventSubscriberInterface
 		$forum_row = $event['forum_row'];
 		$row = $event['row'];
 
+		// Add the template switch for viewforum
 		$forum_row['S_ANSWERED'] = $row['bestanswer_id'] ? true : false;
 
 		$event['forum_row'] = $forum_row;
@@ -180,6 +181,7 @@ class listener implements EventSubscriberInterface
 		$userdata = $event['userdata'];
 		$post_info = $event['post_info'];
 
+		// Query the topic table so we can update answer counts correctly
 		$sql = 'SELECT bestanswer_id
 			FROM ' . TOPICS_TABLE . '
 			WHERE topic_id = ' . $post_info['topic_id'];
@@ -187,6 +189,7 @@ class listener implements EventSubscriberInterface
 		$bestanswer_id = (int) $this->db->sql_fetchfield('bestanswer_id');
 		$this->db->sql_freeresult($result);
 
+		// Update the answer counts
 		if ($bestanswer_id == $post_info['post_id'])
 		{
 			$sql = 'UPDATE ' . USERS_TABLE . '
