@@ -125,9 +125,10 @@ class main_controller
 						// If a best answer is already set, we need to update the user's answer count first
 						if ($topic_data['bestanswer_id'])
 						{
-							$sql = 'SELECT poster_id
-								FROM ' . POSTS_TABLE . '
-								WHERE post_id = ' . $topic_data['bestanswer_id'];
+							$sql = 'SELECT p.*, u.user_id, u.username, u.user_colour
+								FROM ' . POSTS_TABLE . ' p, ' . USERS_TABLE . ' u
+								WHERE p.post_id = ' . $topic_data['bestanswer_id'] . '
+									AND p.poster_id = u.user_id';
 							$result = $this->db->sql_query($sql);
 							$row = $this->db->sql_fetchrow($result);
 							$this->db->sql_freeresult($result);
@@ -137,9 +138,9 @@ class main_controller
 								WHERE user_id = ' . $row['poster_id'];
 							$this->db->sql_query($sql);
 
-						$log_var = $this->auth->acl_get('m_mark_bestanswer', $topic_data['forum_id']) ? 'mod' : 'user';
-						$post_author = get_username_string('full', $topic_data['user_id'], $topic_data['username'], $topic_data['user_colour']);
-						$this->log->add($log_var, $this->user->data['user_id'], $this->user->data['user_ip'], 'LOG_UNMARK_ANSWER', time(), array($topic_data['post_subject'], $post_author));
+							$log_var = $this->auth->acl_get('m_mark_bestanswer', $topic_data['forum_id']) ? 'mod' : 'user';
+							$post_author = get_username_string('full', $row['poster_id'], $row['username'], $row['user_colour']);
+							$this->log->add($log_var, $this->user->data['user_id'], $this->user->data['user_ip'], 'LOG_UNMARK_ANSWER', time(), array($topic_data['post_subject'], $post_author));
 						}
 
 						// Now, update everything
