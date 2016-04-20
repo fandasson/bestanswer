@@ -21,6 +21,9 @@ class main_controller
 	/** @var \phpbb\db\driver\driver_interface */
 	protected $db;
 
+	/** @var \phpbb\log\log */
+	protected $log;
+
 	/** @var \phpbb\request\request */
 	protected $request;
 
@@ -38,16 +41,18 @@ class main_controller
 	*
 	* @param \phpbb\auth\auth						$auth			Auth object
 	* @param \phpbb\db\driver\driver_interface		$db				Database object
+	* @param \phpbb\log\log							$log			Log object
 	* @param \phpbb\request\request					$request		Request object
 	* @param \phpbb\user							$user			User object
 	* @param string									$root_path
 	* @param string									$php_ext
 	* @access public
 	*/
-	public function __construct(\phpbb\auth\auth $auth, \phpbb\db\driver\driver_interface $db, \phpbb\request\request $request, \phpbb\user $user, $root_path, $php_ext)
+	public function __construct(\phpbb\auth\auth $auth, \phpbb\db\driver\driver_interface $db, \phpbb\log\log $log, \phpbb\request\request $request, \phpbb\user $user, $root_path, $php_ext)
 	{
 		$this->auth = $auth;
 		$this->db = $db;
+		$this->log = $log;
 		$this->request = $request;
 		$this->user = $user;
 		$this->root_path = $root_path;
@@ -60,7 +65,7 @@ class main_controller
 
 		// Grab all the data necessary for error checking
 		$sql_array = array(
-			'SELECT'	=> 't.*, f.*, p.*, u.user_id',
+			'SELECT'	=> 't.*, f.*, p.*, u.user_id, u.username, u.user_colour',
 
 			'FROM'		=> array(
 				FORUMS_TABLE	=> 'f',
@@ -109,6 +114,10 @@ class main_controller
 							SET user_answers = user_answers - 1
 							WHERE user_id = ' . $topic_data['user_id'];
 						$this->db->sql_query($sql);
+
+						$log_var = $this->auth->acl_get('m_mark_bestanswer', $topic_data['forum_id']) ? 'mod' : 'user';
+						$post_author = get_username_string('full', $topic_data['user_id'], $topic_data['username'], $topic_data['user_colour']);
+						$this->log->add($log_var, $this->user->data['user_id'], $this->user->data['user_ip'], 'LOG_UNMARK_ANSWER', time(), array($topic_data['post_subject'], $post_author));
 					}
 
 					if ($action == 'mark_answer')
@@ -127,6 +136,10 @@ class main_controller
 								SET user_answers = user_answers - 1
 								WHERE user_id = ' . $row['poster_id'];
 							$this->db->sql_query($sql);
+
+						$log_var = $this->auth->acl_get('m_mark_bestanswer', $topic_data['forum_id']) ? 'mod' : 'user';
+						$post_author = get_username_string('full', $topic_data['user_id'], $topic_data['username'], $topic_data['user_colour']);
+						$this->log->add($log_var, $this->user->data['user_id'], $this->user->data['user_ip'], 'LOG_UNMARK_ANSWER', time(), array($topic_data['post_subject'], $post_author));
 						}
 
 						// Now, update everything
@@ -139,6 +152,10 @@ class main_controller
 							SET user_answers = user_answers + 1
 							WHERE user_id = ' . $topic_data['user_id'];
 						$this->db->sql_query($sql);
+
+						$log_var = $this->auth->acl_get('m_mark_bestanswer', $topic_data['forum_id']) ? 'mod' : 'user';
+						$post_author = get_username_string('full', $topic_data['user_id'], $topic_data['username'], $topic_data['user_colour']);
+						$this->log->add($log_var, $this->user->data['user_id'], $this->user->data['user_ip'], 'LOG_MARK_ANSWER', time(), array($topic_data['post_subject'], $post_author));
 					}
 				}
 				else

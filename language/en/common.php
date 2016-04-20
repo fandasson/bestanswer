@@ -52,6 +52,9 @@ $lang = array_merge($lang, array(
 
 	'INVALID_FILTER'	=> 'The filter parameter is invalid. Please verify this variable is correct.',
 
+	'LOG_MARK_ANSWER'	=> '<strong>Marked post as best answer</strong><br />» %1$s by %2$s',
+	'LOG_UNMARK_ANSWER'	=> '<strong>Unmarked post as best answer</strong><br />» %1$s by %2$s',
+
 	'MARK_ANSWER'			=> 'Mark post as best answer',
 	'MARK_ANSWER_CONFIRM'	=> 'Are you sure you want to mark this post as the best answer?',
 

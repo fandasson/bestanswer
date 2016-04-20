@@ -18,6 +18,7 @@ services:
         arguments:
             - @auth
             - @dbal.conn
+            - @log
             - @request
             - @user
             - %core.root_path%
