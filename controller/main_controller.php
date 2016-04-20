@@ -96,6 +96,8 @@ class main_controller
 			throw new \phpbb\exception\http_exception(403, $this->user->lang('NOT_AUTHORISED'));
 		}
 
+		$log_var = $this->auth->acl_get('m_mark_bestanswer', $topic_data['forum_id']) ? 'mod' : 'user';
+
 		// OK, either mark or unmark answers
 		switch ($action)
 		{
@@ -115,7 +117,6 @@ class main_controller
 							WHERE user_id = ' . $topic_data['user_id'];
 						$this->db->sql_query($sql);
 
-						$log_var = $this->auth->acl_get('m_mark_bestanswer', $topic_data['forum_id']) ? 'mod' : 'user';
 						$post_author = get_username_string('full', $topic_data['user_id'], $topic_data['username'], $topic_data['user_colour']);
 						$this->log->add($log_var, $this->user->data['user_id'], $this->user->data['user_ip'], 'LOG_UNMARK_ANSWER', time(), array($topic_data['post_subject'], $post_author));
 					}
@@ -138,7 +139,6 @@ class main_controller
 								WHERE user_id = ' . $row['poster_id'];
 							$this->db->sql_query($sql);
 
-							$log_var = $this->auth->acl_get('m_mark_bestanswer', $topic_data['forum_id']) ? 'mod' : 'user';
 							$post_author = get_username_string('full', $row['poster_id'], $row['username'], $row['user_colour']);
 							$this->log->add($log_var, $this->user->data['user_id'], $this->user->data['user_ip'], 'LOG_UNMARK_ANSWER', time(), array($topic_data['post_subject'], $post_author));
 						}
@@ -154,7 +154,6 @@ class main_controller
 							WHERE user_id = ' . $topic_data['user_id'];
 						$this->db->sql_query($sql);
 
-						$log_var = $this->auth->acl_get('m_mark_bestanswer', $topic_data['forum_id']) ? 'mod' : 'user';
 						$post_author = get_username_string('full', $topic_data['user_id'], $topic_data['username'], $topic_data['user_colour']);
 						$this->log->add($log_var, $this->user->data['user_id'], $this->user->data['user_ip'], 'LOG_MARK_ANSWER', time(), array($topic_data['post_subject'], $post_author));
 					}
