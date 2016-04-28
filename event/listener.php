@@ -351,6 +351,9 @@ class listener implements EventSubscriberInterface
 			$post_row['U_UNMARK_ANSWER'] = $this->helper->route('kinerity_bestanswer_main_controller', array('action' => 'unmark_answer', 'p' => (int) $row['post_id']));
 		}
 
+		// Define the S_FIRST_POST variable - fixes viewtopic issues
+		$post_row['S_FIRST_POST'] = $topic_data['topic_first_post_id'] == $row['post_id'] ? true : false;
+
 		// Only pull answer post text if a bestanswer_id is supplied and the post_id is the first post in a topic
 		if (sizeof($this->answer) && ($topic_data['topic_first_post_id'] == $row['post_id']))
 		{
