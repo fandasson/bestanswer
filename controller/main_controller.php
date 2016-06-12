@@ -109,17 +109,17 @@ class main_controller
 					{
 						$sql = 'UPDATE ' . TOPICS_TABLE . '
 							SET bestanswer_id = 0
-							WHERE topic_id = ' . $topic_data['topic_id'];
+							WHERE topic_id = ' . (int) $topic_data['topic_id'];
 						$this->db->sql_query($sql);
 
 						$sql = 'UPDATE ' . TOPICS_TABLE . '
 							SET bestanswer_user_id = 0
-							WHERE topic_id = ' . $topic_data['topic_id'];
+							WHERE topic_id = ' . (int) $topic_data['topic_id'];
 						$this->db->sql_query($sql);
 
 						$sql = 'UPDATE ' . USERS_TABLE . '
 							SET user_answers = user_answers - 1
-							WHERE user_id = ' . $topic_data['user_id'];
+							WHERE user_id = ' . (int) $topic_data['user_id'];
 						$this->db->sql_query($sql);
 
 						$post_author = get_username_string('full', $topic_data['user_id'], $topic_data['username'], $topic_data['user_colour']);
@@ -133,7 +133,7 @@ class main_controller
 						{
 							$sql = 'SELECT p.*, u.user_id, u.username, u.user_colour
 								FROM ' . POSTS_TABLE . ' p, ' . USERS_TABLE . ' u
-								WHERE p.post_id = ' . $topic_data['bestanswer_id'] . '
+								WHERE p.post_id = ' . (int) $topic_data['bestanswer_id'] . '
 									AND p.poster_id = u.user_id';
 							$result = $this->db->sql_query($sql);
 							$row = $this->db->sql_fetchrow($result);
@@ -141,7 +141,7 @@ class main_controller
 								
 							$sql = 'UPDATE ' . USERS_TABLE . '
 								SET user_answers = user_answers - 1
-								WHERE user_id = ' . $row['poster_id'];
+								WHERE user_id = ' . (int) $row['poster_id'];
 							$this->db->sql_query($sql);
 
 							$post_author = get_username_string('full', $row['poster_id'], $row['username'], $row['user_colour']);
@@ -151,17 +151,17 @@ class main_controller
 						// Now, update everything
 						$sql = 'UPDATE ' . TOPICS_TABLE . '
 							SET bestanswer_id = ' . (int) $post_id . '
-							WHERE topic_id = ' . $topic_data['topic_id'];
+							WHERE topic_id = ' . (int) $topic_data['topic_id'];
 						$this->db->sql_query($sql);
 
 						$sql = 'UPDATE ' . TOPICS_TABLE . '
 							SET bestanswer_user_id = ' . (int) $topic_data['user_id'] . '
-							WHERE topic_id = ' . $topic_data['topic_id'];
+							WHERE topic_id = ' . (int) $topic_data['topic_id'];
 						$this->db->sql_query($sql);
 
 						$sql = 'UPDATE ' . USERS_TABLE . '
 							SET user_answers = user_answers + 1
-							WHERE user_id = ' . $topic_data['user_id'];
+							WHERE user_id = ' . (int) $topic_data['user_id'];
 						$this->db->sql_query($sql);
 
 						$post_author = get_username_string('full', $topic_data['user_id'], $topic_data['username'], $topic_data['user_colour']);

@@ -84,11 +84,7 @@ class listener implements EventSubscriberInterface
 			'core.acp_manage_forums_request_data'		=> 'acp_manage_forums_request_data',
 
 			'core.delete_posts_in_transaction_before'	=> 'delete_posts_in_transaction_before',
-			/**
-			* TODO: implement these events?
-			*
-			*'core.delete_topics_before_query'			=> 'delete_topics_before_query',
-			*/
+			'core.delete_topics_before_query'			=> 'delete_topics_before_query',
 			'core.display_forums_modify_forum_rows'		=> 'display_forums_modify_forum_rows',
 			'core.display_forums_modify_sql'			=> 'display_forums_modify_sql',
 			'core.display_forums_modify_template_vars'	=> 'display_forums_modify_template_vars',
@@ -178,6 +174,26 @@ class listener implements EventSubscriberInterface
 		}
 	}
 
+	public function delete_topics_before_query($event)
+	{
+		$topic_ids = $event['topic_ids'];
+
+		foreach ($topic_ids as $topic_id)
+		{
+			$sql = 'SELECT bestanswer_user_id
+				FROM ' . TOPICS_TABLE . '
+				WHERE topic_id = ' . (int) $topic_id;
+			$result = $this->db->sql_query($sql);
+			$bestanswer_user_id = (int) $this->db->sql_fetchfield('bestanswer_user_id');
+			$this->db->sql_freeresult($result);
+
+			$sql = 'UPDATE ' . USERS_TABLE . '
+				SET user_answers = user_answers - 1
+				WHERE user_id = ' . (int) $bestanswer_user_id;
+			$this->db->sql_query($sql);
+		}
+	}
+
 	public function display_forums_modify_forum_rows($event)
 	{
 		$forum_rows = $event['forum_rows'];
@@ -226,7 +242,7 @@ class listener implements EventSubscriberInterface
 		// Query the topic table so we can update answer counts correctly
 		$sql = 'SELECT bestanswer_id
 			FROM ' . TOPICS_TABLE . '
-			WHERE topic_id = ' . $post_info['topic_id'];
+			WHERE topic_id = ' . (int) $post_info['topic_id'];
 		$result = $this->db->sql_query($sql);
 		$bestanswer_id = (int) $this->db->sql_fetchfield('bestanswer_id');
 		$this->db->sql_freeresult($result);
@@ -236,17 +252,17 @@ class listener implements EventSubscriberInterface
 		{
 			$sql = 'UPDATE ' . USERS_TABLE . '
 				SET user_answers = user_answers - 1
-				WHERE user_id = ' . $post_info['user_id'];
+				WHERE user_id = ' . (int) $post_info['user_id'];
 			$this->db->sql_query($sql);
 
 			$sql = 'UPDATE ' . USERS_TABLE . '
 				SET user_answers = user_answers + 1
-				WHERE user_id = ' . $userdata['user_id'];
+				WHERE user_id = ' . (int) $userdata['user_id'];
 			$this->db->sql_query($sql);
 
 			$sql = 'UPDATE ' . TOPICS_TABLE . '
 				SET bestanswer_user_id = ' . (int) $userdata['user_id'] . '
-				WHERE bestanswer_id = ' . $bestanswer_id;
+				WHERE bestanswer_id = ' . (int) $bestanswer_id;
 			$this->db->sql_query($sql);
 		}
 	}
