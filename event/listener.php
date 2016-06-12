@@ -89,7 +89,9 @@ class listener implements EventSubscriberInterface
 			'core.display_forums_modify_sql'			=> 'display_forums_modify_sql',
 			'core.display_forums_modify_template_vars'	=> 'display_forums_modify_template_vars',
 
-			'core.mcp_change_poster_after'	=> 'mcp_change_poster_after',
+			'core.mcp_change_poster_after'			=> 'mcp_change_poster_after',
+			'core.mcp_topic_modify_post_data'		=> 'mcp_topic_modify_post_data',
+			'core.mcp_view_forum_modify_topicrow'	=> 'mcp_view_forum_modify_topicrow',
 
 			'core.permissions'	=> 'permissions',
 
@@ -265,6 +267,35 @@ class listener implements EventSubscriberInterface
 				WHERE bestanswer_id = ' . (int) $bestanswer_id;
 			$this->db->sql_query($sql);
 		}
+	}
+
+	public function mcp_topic_modify_post_data($event)
+	{
+		$topic_id = $event['topic_id'];
+
+		$sql = 'SELECT bestanswer_id
+			FROM ' . TOPICS_TABLE . '
+			WHERE topic_id = ' . (int) $topic_id;
+		$result = $this->db->sql_query($sql);
+		$bestanswer_id = (int) $this->db->sql_fetchfield('bestanswer_id');
+		$this->db->sql_freeresult($result);
+
+		if ($bestanswer_id)
+		{
+			$this->template->assign_vars(array(
+				'S_ANSWERED'	=> true,
+			));
+		}
+	}
+
+	public function mcp_view_forum_modify_topicrow($event)
+	{
+		$row = $event['row'];
+		$topic_row = $event['topic_row'];
+
+		$topic_row['S_ANSWERED'] = $row['bestanswer_id'] ? true : false;
+
+		$event['topic_row'] = $topic_row;
 	}
 
 	public function modify_topicrow_tpl_ary($event)
