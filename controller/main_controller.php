@@ -112,6 +112,11 @@ class main_controller
 							WHERE topic_id = ' . $topic_data['topic_id'];
 						$this->db->sql_query($sql);
 
+						$sql = 'UPDATE ' . TOPICS_TABLE . '
+							SET bestanswer_user_id = 0
+							WHERE topic_id = ' . $topic_data['topic_id'];
+						$this->db->sql_query($sql);
+
 						$sql = 'UPDATE ' . USERS_TABLE . '
 							SET user_answers = user_answers - 1
 							WHERE user_id = ' . $topic_data['user_id'];
@@ -146,6 +151,11 @@ class main_controller
 						// Now, update everything
 						$sql = 'UPDATE ' . TOPICS_TABLE . '
 							SET bestanswer_id = ' . (int) $post_id . '
+							WHERE topic_id = ' . $topic_data['topic_id'];
+						$this->db->sql_query($sql);
+
+						$sql = 'UPDATE ' . TOPICS_TABLE . '
+							SET bestanswer_user_id = ' . (int) $topic_data['user_id'] . '
 							WHERE topic_id = ' . $topic_data['topic_id'];
 						$this->db->sql_query($sql);
 

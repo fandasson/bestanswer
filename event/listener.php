@@ -83,10 +83,10 @@ class listener implements EventSubscriberInterface
 			'core.acp_manage_forums_initialise_data'	=> 'acp_manage_forums_initialise_data',
 			'core.acp_manage_forums_request_data'		=> 'acp_manage_forums_request_data',
 
+			'core.delete_posts_in_transaction_before'	=> 'delete_posts_in_transaction_before',
 			/**
 			* TODO: implement these events?
 			*
-			*'core.delete_posts_before'					=> 'delete_posts_before',
 			*'core.delete_topics_before_query'			=> 'delete_topics_before_query',
 			*/
 			'core.display_forums_modify_forum_rows'		=> 'display_forums_modify_forum_rows',
@@ -134,6 +134,48 @@ class listener implements EventSubscriberInterface
 		$forum_data = $event['forum_data'];
 		$forum_data['enable_bestanswer'] = $this->request->variable('enable_bestanswer', 0);
 		$event['forum_data'] = $forum_data;
+	}
+
+	public function delete_posts_in_transaction_before($event)
+	{
+		$post_ids = $event['post_ids'];
+		$poster_ids = $event['poster_ids'];
+
+		$bestanswer_ary = $bestanswer_user_ids = array();
+		$sql = 'SELECT bestanswer_id, bestanswer_user_id
+			FROM ' . TOPICS_TABLE . '
+			WHERE bestanswer_id != 0';
+		$result = $this->db->sql_query($sql);
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$bestanswer_ary[] = $row['bestanswer_id'];
+			$bestanswer_user_ids[] = $row['bestanswer_user_id'];
+		}
+		$this->db->sql_freeresult($result);
+
+		foreach ($bestanswer_user_ids as $bestanswer_user_id)
+		{
+			$sql = 'UPDATE ' . USERS_TABLE . '
+				SET user_answers = user_answers - 1
+				WHERE user_id = ' . (int) $bestanswer_user_id;
+			$this->db->sql_query($sql);
+		}
+
+		foreach ($post_ids as $post_id)
+		{
+			if (in_array($post_id, $bestanswer_ary))
+			{
+				$sql = 'UPDATE ' . TOPICS_TABLE . '
+					SET bestanswer_user_id = 0
+					WHERE bestanswer_id = ' . (int) $post_id;
+				$this->db->sql_query($sql);
+
+				$sql = 'UPDATE ' . TOPICS_TABLE . '
+					SET bestanswer_id = 0
+					WHERE bestanswer_id = ' . (int) $post_id;
+				$this->db->sql_query($sql);
+			}
+		}
 	}
 
 	public function display_forums_modify_forum_rows($event)
@@ -200,6 +242,11 @@ class listener implements EventSubscriberInterface
 			$sql = 'UPDATE ' . USERS_TABLE . '
 				SET user_answers = user_answers + 1
 				WHERE user_id = ' . $userdata['user_id'];
+			$this->db->sql_query($sql);
+
+			$sql = 'UPDATE ' . TOPICS_TABLE . '
+				SET bestanswer_user_id = ' . (int) $userdata['user_id'] . '
+				WHERE bestanswer_id = ' . $bestanswer_id;
 			$this->db->sql_query($sql);
 		}
 	}

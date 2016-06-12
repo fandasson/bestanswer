@@ -26,7 +26,8 @@ class release_0_0_1 extends \phpbb\db\migration\migration
 					'enable_bestanswer'	=> array('BOOL', 0),
 				),
 				$this->table_prefix . 'topics'	=> array(
-					'bestanswer_id'	=> array('UINT', 0),
+					'bestanswer_id'			=> array('UINT', 0),
+					'bestanswer_user_id'	=> array('UINT', 0),
 				),
 				$this->table_prefix . 'users'	=> array(
 					'user_answers'	=> array('UINT', 0),
