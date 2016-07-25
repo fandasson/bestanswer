@@ -138,18 +138,37 @@ class listener implements EventSubscriberInterface
 	{
 		$post_ids = $event['post_ids'];
 		$poster_ids = $event['poster_ids'];
+		$topic_ids = $event['topic_ids'];
 
 		$bestanswer_ary = $bestanswer_user_ids = array();
+
 		$sql = 'SELECT bestanswer_id, bestanswer_user_id
 			FROM ' . TOPICS_TABLE . '
-			WHERE bestanswer_id != 0';
+			WHERE bestanswer_id != 0
+				AND ' . $this->db->sql_in_set('topic_id', $topic_ids);
 		$result = $this->db->sql_query($sql);
 		while ($row = $this->db->sql_fetchrow($result))
 		{
-			$bestanswer_ary[] = $row['bestanswer_id'];
-			$bestanswer_user_ids[] = $row['bestanswer_user_id'];
+			if (in_array($row['bestanswer_id'], $post_ids))
+			{
+				$bestanswer_ary[] = $row['bestanswer_id'];
+				$bestanswer_user_ids[] = $row['bestanswer_user_id'];
+			}
 		}
 		$this->db->sql_freeresult($result);
+
+		foreach ($bestanswer_ary as $post_id)
+		{
+			$sql = 'UPDATE ' . TOPICS_TABLE . '
+				SET bestanswer_user_id = 0
+				WHERE bestanswer_id = ' . (int) $post_id;
+			$this->db->sql_query($sql);
+
+			$sql = 'UPDATE ' . TOPICS_TABLE . '
+				SET bestanswer_id = 0
+				WHERE bestanswer_id = ' . (int) $post_id;
+			$this->db->sql_query($sql);
+		}
 
 		foreach ($bestanswer_user_ids as $bestanswer_user_id)
 		{
@@ -157,22 +176,6 @@ class listener implements EventSubscriberInterface
 				SET user_answers = user_answers - 1
 				WHERE user_id = ' . (int) $bestanswer_user_id;
 			$this->db->sql_query($sql);
-		}
-
-		foreach ($post_ids as $post_id)
-		{
-			if (in_array($post_id, $bestanswer_ary))
-			{
-				$sql = 'UPDATE ' . TOPICS_TABLE . '
-					SET bestanswer_user_id = 0
-					WHERE bestanswer_id = ' . (int) $post_id;
-				$this->db->sql_query($sql);
-
-				$sql = 'UPDATE ' . TOPICS_TABLE . '
-					SET bestanswer_id = 0
-					WHERE bestanswer_id = ' . (int) $post_id;
-				$this->db->sql_query($sql);
-			}
 		}
 	}
 
@@ -413,6 +416,7 @@ class listener implements EventSubscriberInterface
 			$result = $this->db->sql_query($sql);
 			while ($post = $this->db->sql_fetchrow($result))
 			{
+				//Future use: if ($post['post_visibility'] == ITEM_APPROVED || $this->auth->acl_get('m_mark_bestanswer', (int) $topic_data['forum_id']))
 				$bbcode_options = (($post['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
 					(($post['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) +
 					(($post['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
@@ -439,7 +443,15 @@ class listener implements EventSubscriberInterface
 		// Enable auth checks and mark/unmark buttons if extension is enabled for this forum
 		if ($topic_data['enable_bestanswer'])
 		{
-			$post_row['S_AUTH'] = $this->auth->acl_get('m_mark_bestanswer', (int) $topic_data['forum_id']) || ($this->auth->acl_get('f_mark_bestanswer', (int) $topic_data['forum_id']) && $topic_data['topic_poster'] == $this->user->data['user_id']) ? true : false;
+			// Check to see if the post is locked
+			if ($topic_data['topic_status'] == ITEM_LOCKED && !$this->auth->acl_get('m_mark_bestanswer', (int) $topic_data['forum_id']))
+			{
+				$post_row['S_AUTH'] = false;
+			}
+			else
+			{
+				$post_row['S_AUTH'] = $this->auth->acl_get('m_mark_bestanswer', (int) $topic_data['forum_id']) || ($this->auth->acl_get('f_mark_bestanswer', (int) $topic_data['forum_id']) && $topic_data['topic_poster'] == $this->user->data['user_id']) ? true : false;
+			}
 
 			$post_row['U_MARK_ANSWER'] = $this->helper->route('kinerity_bestanswer_main_controller', array('action' => 'mark_answer', 'p' => (int) $row['post_id']));
 			$post_row['U_UNMARK_ANSWER'] = $this->helper->route('kinerity_bestanswer_main_controller', array('action' => 'unmark_answer', 'p' => (int) $row['post_id']));
