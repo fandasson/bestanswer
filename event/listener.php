@@ -214,16 +214,23 @@ class listener implements EventSubscriberInterface
 	{
 		$sql_ary = $event['sql_ary'];
 
-		$sql_ary['SELECT'] .= ', t.bestanswer_id, t.topic_id AS forum_last_post_topic_id';
+		$sql_ary['SELECT'] .= ', t.bestanswer_id, t.topic_id';
 
-		$sql_ary['LEFT_JOIN'][] = array(
-			'FROM'	=> array(POSTS_TABLE => 'p'),
-			'ON'	=> 'f.forum_last_post_id = p.post_id',
-		);
-		$sql_ary['LEFT_JOIN'][] = array(
-			'FROM'	=> array(TOPICS_TABLE => 't'),
-			'ON'	=> 't.topic_id = p.topic_id',
-		);
+		if (!$this->has_join($sql_ary['LEFT_JOIN'], POSTS_TABLE))
+		{
+			$sql_ary['LEFT_JOIN'][] = array(
+				'FROM'	=> array(POSTS_TABLE => 'p'),
+				'ON'	=> 'f.forum_last_post_id = p.post_id',
+			);
+		}
+
+		if (!$this->has_join($sql_ary['LEFT_JOIN'], TOPICS_TABLE))
+		{
+			$sql_ary['LEFT_JOIN'][] = array(
+				'FROM'	=> array(TOPICS_TABLE => 't'),
+				'ON'	=> 't.topic_id = p.topic_id',
+			);
+		}
 
 		$event['sql_ary'] = $sql_ary;
 	}
@@ -484,5 +491,18 @@ class listener implements EventSubscriberInterface
 		));
 
 		return $block;
+	}
+
+	private function has_join($join_ary, $table)
+	{
+		foreach ($join_ary as $join)
+		{
+			if (isset($join['FROM'][$table]))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
