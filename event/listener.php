@@ -423,7 +423,6 @@ class listener implements EventSubscriberInterface
 			$result = $this->db->sql_query($sql);
 			while ($post = $this->db->sql_fetchrow($result))
 			{
-				//Future use: if ($post['post_visibility'] == ITEM_APPROVED || $this->auth->acl_get('m_mark_bestanswer', (int) $topic_data['forum_id']))
 				$bbcode_options = (($post['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
 					(($post['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) +
 					(($post['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
