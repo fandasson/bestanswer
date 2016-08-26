@@ -92,6 +92,7 @@ class listener implements EventSubscriberInterface
 			'core.mcp_change_poster_after'			=> 'mcp_change_poster_after',
 			'core.mcp_topic_modify_post_data'		=> 'mcp_topic_modify_post_data',
 			'core.mcp_view_forum_modify_topicrow'	=> 'mcp_view_forum_modify_topicrow',
+			'core.memberlist_view_profile'			=> 'memberlist_view_profile',
 
 			'core.permissions'	=> 'permissions',
 
@@ -306,6 +307,19 @@ class listener implements EventSubscriberInterface
 		$topic_row['S_ANSWERED'] = $row['bestanswer_id'] ? true : false;
 
 		$event['topic_row'] = $topic_row;
+	}
+
+	public function memberlist_view_profile($event)
+	{
+		$member = $event['member'];
+
+		$url = append_sid("{$this->root_path}search.{$this->php_ext}", 'author_id=' . (int) $poster_id . '&amp;sr=topics&amp;filter=topicsanswered');
+
+		$this->template->assign_vars(array(
+			'TOPICS_ANSWERED'	=> $member['user_answers'],
+
+			'U_TOPICS_ANSWERED'	=> $url,
+		));
 	}
 
 	public function modify_topicrow_tpl_ary($event)
