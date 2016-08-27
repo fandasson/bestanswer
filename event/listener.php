@@ -313,7 +313,7 @@ class listener implements EventSubscriberInterface
 	{
 		$member = $event['member'];
 
-		$url = append_sid("{$this->root_path}search.{$this->php_ext}", 'author_id=' . (int) $poster_id . '&amp;sr=topics&amp;filter=topicsanswered');
+		$url = append_sid("{$this->root_path}search.{$this->php_ext}", 'author_id=' . (int) $member['user_id'] . '&amp;sr=topics&amp;filter=topicsanswered');
 
 		$this->template->assign_vars(array(
 			'TOPICS_ANSWERED'	=> $member['user_answers'],
