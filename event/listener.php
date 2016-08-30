@@ -215,7 +215,7 @@ class listener implements EventSubscriberInterface
 	{
 		$sql_ary = $event['sql_ary'];
 
-		$sql_ary['SELECT'] .= ', t.bestanswer_id, t.topic_id';
+		$sql_ary['SELECT'] .= ', t.bestanswer_id';
 
 		if (!$this->has_join($sql_ary['LEFT_JOIN'], POSTS_TABLE))
 		{
@@ -408,7 +408,7 @@ class listener implements EventSubscriberInterface
 		if ($topic_data['bestanswer_id'])
 		{
 			$this->template->assign_vars(array(
-				'S_ANSWERED'	=> true,
+				'S_ANSWERED'		=> true,
 			));
 		}
 	}
@@ -435,14 +435,14 @@ class listener implements EventSubscriberInterface
 				WHERE p.post_id = ' . (int) $topic_data['bestanswer_id'] . '
 					AND p.poster_id = u.user_id';
 			$result = $this->db->sql_query($sql);
-			while ($post = $this->db->sql_fetchrow($result))
+			while ($row = $this->db->sql_fetchrow($result))
 			{
-				$bbcode_options = (($post['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
-					(($post['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) +
-					(($post['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
-				$this->answer['ANSWER_TEXT'] = generate_text_for_display($post['post_text'], $post['bbcode_uid'], $post['bbcode_bitfield'], $bbcode_options);
-				$this->answer['ANSWER_AUTHOR_FULL'] = get_username_string('full', $post['user_id'], $post['username'], $post['user_colour']);
-				$this->answer['ANSWER_DATE'] = $this->user->format_date($post['post_time']);
+				$bbcode_options = (($row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
+					(($row['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) +
+					(($row['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
+				$this->answer['TEXT'] = generate_text_for_display($row['post_text'], $row['bbcode_uid'], $row['bbcode_bitfield'], $bbcode_options);
+				$this->answer['AUTHOR_FULL'] = get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']);
+				$this->answer['DATE'] = $this->user->format_date($row['post_time']);
 			}
 			$this->db->sql_freeresult($result);
 		}
@@ -483,9 +483,9 @@ class listener implements EventSubscriberInterface
 		// Only pull answer post text if a bestanswer_id is supplied and the post_id is the first post in a topic
 		if (sizeof($this->answer) && ($topic_data['topic_first_post_id'] == $row['post_id']))
 		{
-			$post_row['ANSWER_TEXT'] = $this->answer['ANSWER_TEXT'];
-			$post_row['ANSWER_AUTHOR_FULL'] = $this->answer['ANSWER_AUTHOR_FULL'];
-			$post_row['ANSWER_DATE'] =  $this->answer['ANSWER_DATE'];
+			$post_row['ANSWER_TEXT'] = $this->answer['TEXT'];
+			$post_row['ANSWER_AUTHOR_FULL'] = $this->answer['AUTHOR_FULL'];
+			$post_row['ANSWER_DATE'] =  $this->answer['DATE'];
 		}
 
 		// Add the topics answered search URL to the mini profile in viewtopic
