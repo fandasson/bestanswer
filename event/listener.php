@@ -408,7 +408,7 @@ class listener implements EventSubscriberInterface
 		if ($topic_data['bestanswer_id'])
 		{
 			$this->template->assign_vars(array(
-				'S_ANSWERED'		=> true,
+				'S_ANSWERED'	=> true,
 			));
 		}
 	}
