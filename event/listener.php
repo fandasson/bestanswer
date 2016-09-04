@@ -291,12 +291,9 @@ class listener implements EventSubscriberInterface
 		$bestanswer_id = (int) $this->db->sql_fetchfield('bestanswer_id');
 		$this->db->sql_freeresult($result);
 
-		if ($bestanswer_id)
-		{
-			$this->template->assign_vars(array(
-				'S_ANSWERED'	=> true,
-			));
-		}
+		$this->template->assign_vars(array(
+			'S_ANSWERED'	=> $bestanswer_id ? true : false,
+		));
 	}
 
 	public function mcp_view_forum_modify_topicrow($event)
@@ -313,12 +310,10 @@ class listener implements EventSubscriberInterface
 	{
 		$member = $event['member'];
 
-		$url = append_sid("{$this->root_path}search.{$this->php_ext}", 'author_id=' . (int) $member['user_id'] . '&amp;sr=topics&amp;filter=topicsanswered');
-
 		$this->template->assign_vars(array(
 			'TOPICS_ANSWERED'	=> $member['user_answers'],
 
-			'U_TOPICS_ANSWERED'	=> $url,
+			'U_TOPICS_ANSWERED'	=> append_sid("{$this->root_path}search.{$this->php_ext}", 'author_id=' . (int) $member['user_id'] . '&amp;sr=topics&amp;filter=topicsanswered'),
 		));
 	}
 
@@ -354,7 +349,9 @@ class listener implements EventSubscriberInterface
 			$sql_from .= ' LEFT JOIN ' . POSTS_TABLE . ' p ON (p.post_id = t.bestanswer_id)';
 			$sql_where .= ' AND p.poster_id = ' . (int) $author_id;
 
-			// Set $total_match_count to 0 - DO NOT modify the event['total_match_count'] variable!
+			// Set $total_match_count to 0 - DO NOT modify
+			// the $event['total_match_count'] variable - it
+			// will be set at the end of this if block
 			$total_match_count = 0;
 
 			// Grab all necessary data to modify total_match_count
@@ -381,6 +378,8 @@ class listener implements EventSubscriberInterface
 
 			$event['total_match_count'] = $total_match_count;
 		}
+		// $filter is only allowed to have topics_answered as a value, but
+		// must also allow empty values so core searches are not affected
 		else if ($filter != '')
 		{
 			trigger_error($this->user->lang('INVALID_FILTER'));
@@ -405,12 +404,9 @@ class listener implements EventSubscriberInterface
 	{
 		$topic_data = $event['topic_data'];
 
-		if ($topic_data['bestanswer_id'])
-		{
-			$this->template->assign_vars(array(
-				'S_ANSWERED'	=> true,
-			));
-		}
+		$this->template->assign_vars(array(
+			'S_ANSWERED'	=> $topic_data['bestanswer_id'] ? true : false,
+		));
 	}
 
 	public function viewtopic_cache_user_data($event)
@@ -456,29 +452,18 @@ class listener implements EventSubscriberInterface
 		$post_row = $event['post_row'];
 		$topic_data = $event['topic_data'];
 
-		$post_row['BESTANSWER_ID'] = (int) $topic_data['bestanswer_id'];
+		$post_row = array_merge($post_row, array(
+			'BESTANSWER_ID'		=> (int) $topic_data['bestanswer_id'],
+			'TOPICS_ANSWERED'	=> $user_poster_data['topics_answered'],
 
-		$post_row['U_ANSWER'] = append_sid("{$this->root_path}viewtopic.{$this->php_ext}", 'p=' . (int) $topic_data['bestanswer_id'] . '#p' . (int) $topic_data['bestanswer_id']);
+			'U_ANSWER'			=> append_sid("{$this->root_path}viewtopic.{$this->php_ext}", 'p=' . (int) $topic_data['bestanswer_id'] . '#p' . (int) $topic_data['bestanswer_id']),
+			'U_MARK_ANSWER'		=> $topic_data['enable_bestanswer'] ? $this->helper->route('kinerity_bestanswer_main_controller', array('action' => 'mark_answer', 'p' => (int) $row['post_id'])) : '',
+			'U_UNMARK_ANSWER'	=> $topic_data['enable_bestanswer'] ? $this->helper->route('kinerity_bestanswer_main_controller', array('action' => 'unmark_answer', 'p' => (int) $row['post_id'])) : '',
+			'U_TOPICS_ANSWERED'	=> append_sid("{$this->root_path}search.{$this->php_ext}", 'author_id=' . (int) $poster_id . '&amp;sr=topics&amp;filter=topicsanswered'),
 
-		// Enable auth checks and mark/unmark buttons if extension is enabled for this forum
-		if ($topic_data['enable_bestanswer'])
-		{
-			// Check to see if the post is locked
-			if ($topic_data['topic_status'] == ITEM_LOCKED && !$this->auth->acl_get('m_mark_bestanswer', (int) $topic_data['forum_id']))
-			{
-				$post_row['S_AUTH'] = false;
-			}
-			else
-			{
-				$post_row['S_AUTH'] = $this->auth->acl_get('m_mark_bestanswer', (int) $topic_data['forum_id']) || ($this->auth->acl_get('f_mark_bestanswer', (int) $topic_data['forum_id']) && $topic_data['topic_poster'] == $this->user->data['user_id']) ? true : false;
-			}
-
-			$post_row['U_MARK_ANSWER'] = $this->helper->route('kinerity_bestanswer_main_controller', array('action' => 'mark_answer', 'p' => (int) $row['post_id']));
-			$post_row['U_UNMARK_ANSWER'] = $this->helper->route('kinerity_bestanswer_main_controller', array('action' => 'unmark_answer', 'p' => (int) $row['post_id']));
-		}
-
-		// Define the S_FIRST_POST variable - fixes viewtopic issues
-		$post_row['S_FIRST_POST'] = $topic_data['topic_first_post_id'] == $row['post_id'] ? true : false;
+			'S_AUTH'		=> $topic_data['topic_status'] == ITEM_LOCKED && !$this->auth->acl_get('m_mark_bestanswer', (int) $topic_data['forum_id']) ? false : ($this->auth->acl_get('m_mark_bestanswer', (int) $topic_data['forum_id']) || ($this->auth->acl_get('f_mark_bestanswer', (int) $topic_data['forum_id']) && $topic_data['topic_poster'] == $this->user->data['user_id']) ? true : false),
+			'S_FIRST_POST'	=> $topic_data['topic_first_post_id'] == $row['post_id'] ? true : false,
+		));
 
 		// Only pull answer post text if a bestanswer_id is supplied and the post_id is the first post in a topic
 		if (sizeof($this->answer) && ($topic_data['topic_first_post_id'] == $row['post_id']))
@@ -487,12 +472,6 @@ class listener implements EventSubscriberInterface
 			$post_row['ANSWER_AUTHOR_FULL'] = $this->answer['AUTHOR_FULL'];
 			$post_row['ANSWER_DATE'] =  $this->answer['DATE'];
 		}
-
-		// Add the topics answered search URL to the mini profile in viewtopic
-		$url = append_sid("{$this->root_path}search.{$this->php_ext}", 'author_id=' . (int) $poster_id . '&amp;sr=topics&amp;filter=topicsanswered');
-
-		$post_row['U_TOPICS_ANSWERED'] = $url;
-		$post_row['TOPICS_ANSWERED'] = $user_poster_data['topics_answered'];
 
 		$event['post_row'] = $post_row;
 	}
