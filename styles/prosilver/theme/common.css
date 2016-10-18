@@ -59,3 +59,8 @@
 .btn-answer {
 	background-color: #74a100;
 }
+
+.bestanswer + .post,
+.bestanswer + a#unread + .post {
+	background-color: #EAF8E2;
+}
