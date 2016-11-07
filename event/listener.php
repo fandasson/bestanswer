@@ -138,10 +138,9 @@ class listener implements EventSubscriberInterface
 	public function delete_posts_in_transaction_before($event)
 	{
 		$post_ids = $event['post_ids'];
-		$poster_ids = $event['poster_ids'];
 		$topic_ids = $event['topic_ids'];
 
-		$bestanswer_ary = $bestanswer_user_ids = array();
+		$post_ary = $user_ary = array();
 
 		$sql = 'SELECT bestanswer_id, bestanswer_user_id
 			FROM ' . TOPICS_TABLE . '
@@ -152,52 +151,42 @@ class listener implements EventSubscriberInterface
 		{
 			if (in_array($row['bestanswer_id'], $post_ids))
 			{
-				$bestanswer_ary[] = $row['bestanswer_id'];
-				$bestanswer_user_ids[] = $row['bestanswer_user_id'];
+				$post_ary[] = $row['bestanswer_id'];
+				$user_ary[] = $row['bestanswer_user_id'];
 			}
 		}
 		$this->db->sql_freeresult($result);
 
-		foreach ($bestanswer_ary as $post_id)
-		{
-			$sql = 'UPDATE ' . TOPICS_TABLE . '
-				SET bestanswer_user_id = 0
-				WHERE bestanswer_id = ' . (int) $post_id;
-			$this->db->sql_query($sql);
+		$postdata = array(
+			'bestanswer_id'			=> 0,
+			'bestanswer_user_id'	=> 0,
+		);
 
-			$sql = 'UPDATE ' . TOPICS_TABLE . '
-				SET bestanswer_id = 0
-				WHERE bestanswer_id = ' . (int) $post_id;
-			$this->db->sql_query($sql);
-		}
+		$sql = 'UPDATE ' . TOPICS_TABLE . ' SET ' . $this->db->sql_build_array('UPDATE', $postdata) . ' WHERE ' . $this->db->sql_in_set('bestanswer_id', $post_ary);
+		$this->db->sql_query($sql);
 
-		foreach ($bestanswer_user_ids as $bestanswer_user_id)
-		{
-			$sql = 'UPDATE ' . USERS_TABLE . '
-				SET user_answers = user_answers - 1
-				WHERE user_id = ' . (int) $bestanswer_user_id;
-			$this->db->sql_query($sql);
-		}
+		$sql = 'UPDATE ' . USERS_TABLE . ' SET user_answers = user_answers - 1 WHERE ' . $this->db->sql_in_set('user_id', $user_ary);
+		$this->db->sql_query($sql);
 	}
 
 	public function delete_topics_before_query($event)
 	{
 		$topic_ids = $event['topic_ids'];
 
-		foreach ($topic_ids as $topic_id)
-		{
-			$sql = 'SELECT bestanswer_user_id
-				FROM ' . TOPICS_TABLE . '
-				WHERE topic_id = ' . (int) $topic_id;
-			$result = $this->db->sql_query($sql);
-			$bestanswer_user_id = (int) $this->db->sql_fetchfield('bestanswer_user_id');
-			$this->db->sql_freeresult($result);
+		$user_ary = array();
 
-			$sql = 'UPDATE ' . USERS_TABLE . '
-				SET user_answers = user_answers - 1
-				WHERE user_id = ' . (int) $bestanswer_user_id;
-			$this->db->sql_query($sql);
+		$sql = 'SELECT bestanswer_user_id
+			FROM ' . TOPICS_TABLE . '
+			WHERE ' . $this->db->sql_in_set('topic_id', $topic_ids);
+		$result = $this->db->sql_query($sql);
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$user_ary[] = $row['bestanswer_user_id'];
 		}
+		$this->db->sql_freeresult($result);
+
+		$sql = 'UPDATE ' . USERS_TABLE . ' SET user_answers = user_answers - 1 WHERE ' . $this->db->sql_in_set('user_id', $user_ary);
+		$this->db->sql_query($sql);
 	}
 
 	public function display_forums_modify_forum_rows($event)
@@ -463,6 +452,7 @@ class listener implements EventSubscriberInterface
 
 			'S_AUTH'		=> $topic_data['topic_status'] == ITEM_LOCKED && !$this->auth->acl_get('m_mark_bestanswer', (int) $topic_data['forum_id']) ? false : ($this->auth->acl_get('m_mark_bestanswer', (int) $topic_data['forum_id']) || ($this->auth->acl_get('f_mark_bestanswer', (int) $topic_data['forum_id']) && $topic_data['topic_poster'] == $this->user->data['user_id']) ? true : false),
 			'S_FIRST_POST'	=> $topic_data['topic_first_post_id'] == $row['post_id'] ? true : false,
+			'S_BEST_ANSWER'	=> $topic_data['enable_bestanswer'] ? true : false,
 		));
 
 		// Only pull answer post text if a bestanswer_id is supplied and the post_id is the first post in a topic
