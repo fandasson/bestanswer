@@ -1,15 +1,18 @@
 {
-	"name": "kinerity/bestanswer",
+	"name": "fandasson/bestanswer",
 	"type": "phpbb-extension",
 	"description": "An extension for phpBB 3.1.x that allows users to mark a post as the 'Best Answer', which will then be quoted in the first post with a link to it.",
-	"homepage": "http://www.acsyste.com",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"license": "GPL-2.0",
 	"authors": [
 		{
 			"name": "kinerity",
 			"email": "kinerity@yahoo.com",
-			"role": "Extension Developer"
+			"role": "Extension Core Developer"
+		},
+		{
+			"name": "fandasson",
+			"role": "Forked version developer"
 		}
 	],
 	"require": {
