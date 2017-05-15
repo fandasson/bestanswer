@@ -1,0 +1,39 @@
+.posts-buttons .bestanswer-btn.mark .fa{
+	color: #74a100;
+	font-weight: bold;
+	font-size:200%;
+	}
+
+.posts-buttons .bestanswer-btn.unmark .fa{
+	}
+
+.answer {
+	background-color: #EAF8E2 !important;
+	padding: 10px;
+	border-radius: 7px;
+	width: 97.5%;
+	margin-bottom: 17px;
+}
+
+.btn, .btn:hover {
+	border-radius: 4px;
+	font-family: Arial;
+	color: #ffffff;
+	font-size: 10px;
+	font-weight: bold;
+	padding: 2px 10px 2px 10px;
+	text-decoration: none;
+}
+
+.btn-post {
+	background-color: #b3b3b3;
+}
+
+.btn-answer {
+	background-color: #74a100;
+}
+
+.bestanswer + .post,
+.bestanswer + a#unread + .post {
+	background-color: #EAF8E2;
+}
