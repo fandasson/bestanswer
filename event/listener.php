@@ -217,8 +217,8 @@ class listener implements EventSubscriberInterface
 		if (!$this->has_join($sql_ary['LEFT_JOIN'], TOPICS_TABLE))
 		{
 			$sql_ary['LEFT_JOIN'][] = array(
-				'FROM'	=> array(TOPICS_TABLE => 't'),
-				'ON'	=> 't.topic_id = p.topic_id',
+				'FROM'	=> array(TOPICS_TABLE => 'ba_topics'),
+				'ON'	=> 'ba_topics.topic_id = p.topic_id',
 			);
 		}
 
