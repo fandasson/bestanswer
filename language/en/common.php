@@ -41,8 +41,8 @@ $lang = array_merge($lang, array(
 	'ANSWERED'	=> 'ANSWERED',
 
 	'BEST_ANSWER'	=> 'BEST ANSWER',
-	'BUTTON_MARK_ANSWER'	=> 'Mark as best',
-	'BUTTON_UNMARK_ANSWER'	=> 'Unmark Answer',
+	'BUTTON_MARK_ANSWER'	=> 'Mark as the best answer',
+	'BUTTON_UNMARK_ANSWER'	=> 'Unmark answer',
 
 	'ENABLE_BESTANSWER'			=> 'Enable "Best Answer" feature',
 	'ENABLE_BESTANSWER_EXPLAIN'	=> 'If enabled, the topic starter (if permitted) and moderators (where allowed) will be able to mark a topic reply as the "best answer".',
