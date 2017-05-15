@@ -41,7 +41,7 @@ $lang = array_merge($lang, array(
 	'ANSWERED'	=> 'ANSWERED',
 
 	'BEST_ANSWER'	=> 'BEST ANSWER',
-	'BUTTON_MARK_ANSWER'	=> 'Mark Answer',
+	'BUTTON_MARK_ANSWER'	=> 'Mark as best',
 	'BUTTON_UNMARK_ANSWER'	=> 'Unmark Answer',
 
 	'ENABLE_BESTANSWER'			=> 'Enable "Best Answer" feature',
@@ -55,7 +55,7 @@ $lang = array_merge($lang, array(
 	'LOG_MARK_ANSWER'	=> '<strong>Marked post as best answer</strong><br />» %1$s by %2$s',
 	'LOG_UNMARK_ANSWER'	=> '<strong>Unmarked post as best answer</strong><br />» %1$s by %2$s',
 
-	'MARK_ANSWER'			=> 'Mark post as best answer',
+	'MARK_ANSWER'			=> 'Mark reply as best answer',
 	'MARK_ANSWER_CONFIRM'	=> 'Are you sure you want to mark this post as the best answer?',
 
 	'TOPIC_FIRST_POST'	=> 'You cannot mark this post as the best answer as it is the first post of the topic.',

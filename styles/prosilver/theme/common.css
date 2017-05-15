@@ -1,38 +1,40 @@
-.icon-mark-answer-button {
-	height: 14px;
-	font-weight: bold;
-	font-size: 11px;
-	color: #434343;
-}
-
-.icon-mark-answer-button:hover {
-	color: #006ac6;
-}
-
 .unmark-answer-button {
 	cursor: pointer;
 	display: inline-block;
 	height: 18px;
+	line-height:17px;
 	font-size: 13px;
 	white-space: nowrap;
 	border: 1px solid transparent;
 	border-radius: 4px;
 	background: transparent none 0 0 repeat-x;
-	padding: 2px 8px;
+	padding: 2px 4px;
 	font-family: "Open Sans", "Droid Sans", Verdana, Arial, Helvetica;
 	position: relative;
+	text-align: center;
 	text-decoration: none !important;
 	outline-style: none !important;
-	vertical-align: bottom;
 }
 
+
+.icon-mark-answer-button{
+	background-color: #74a100;
+	color: #FFF;
+	}
+
+.icon-mark-answer-button:hover {
+	color: #FFF;
+	}
 .icon-unmark-answer-button, .icon-unmark-answer-button:hover {
-	height: 14px;
-	font-weight: bold;
-	font-size: 11px;
 	background-color: #902600;
 	color: #FFFFFF;
+	padding-left:3px;
+	padding-right:3px;
 }
+
+.icon-unmark-answer-button .icon:before{
+	padding-right:0;
+	}
 
 .answer {
 	background-color: #EAF8E2 !important;
