@@ -1,8 +1,8 @@
 {
 	"name": "fandasson/bestanswer",
 	"type": "phpbb-extension",
-	"description": "An extension for phpBB 3.1.x that allows users to mark a post as the 'Best Answer', which will then be quoted in the first post with a link to it.",
-	"version": "1.0.1",
+	"description": "An extension for phpBB 3.1.x and 3.2.x that allows users to mark a post as the 'Best Answer', which will then be quoted in the first post with a link to it.",
+	"version": "1.0.2",
 	"license": "GPL-2.0",
 	"authors": [
 		{
