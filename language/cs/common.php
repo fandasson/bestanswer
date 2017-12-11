@@ -38,29 +38,29 @@ if (empty($lang) || !is_array($lang))
 //
 
 $lang = array_merge($lang, array(
-	'ANSWERED'	=> 'ANSWERED',
+	'ANSWERED'	=> 'ZODPOVĚZENO',
 
-	'BEST_ANSWER'	=> 'BEST ANSWER',
-	'BUTTON_MARK_ANSWER'	=> 'Mark as the best answer',
-	'BUTTON_UNMARK_ANSWER'	=> 'Unmark answer',
+	'BEST_ANSWER'	=> 'NEJLEPŠÍ ODPOVĚĎ',
+	'BUTTON_MARK_ANSWER'	=> 'Označit jako nejlepší odpověď',
+	'BUTTON_UNMARK_ANSWER'	=> 'Zrušit označení',
 
-	'ENABLE_BESTANSWER'			=> 'Enable "Best Answer" feature',
-	'ENABLE_BESTANSWER_EXPLAIN'	=> 'If enabled, the topic starter (if permitted) and moderators (where allowed) will be able to mark a topic reply as the "best answer".',
-	'EXTENSION_NOT_ENABLED'		=> 'The Best Answer extension is not enabled on this forum.',
+    'ENABLE_BESTANSWER'			=> 'Enable "Best Answer" feature',
+    'ENABLE_BESTANSWER_EXPLAIN'	=> 'If enabled, the topic starter (if permitted) and moderators (where allowed) will be able to mark a topic reply as the "best answer".',
+	'EXTENSION_NOT_ENABLED'		=> 'Rozšíření "Nejlepší odpvoěď" není pro toto fórum povolené',
 
-	'FULL_POST'	=> 'GO TO FULL POST',
+	'FULL_POST'	=> 'CELÁ ODPOVĚĎ',
 
 	'INVALID_FILTER'	=> 'The filter parameter is invalid. Please verify this variable is correct.',
 
 	'LOG_MARK_ANSWER'	=> '<strong>Marked post as best answer</strong><br />» %1$s by %2$s',
 	'LOG_UNMARK_ANSWER'	=> '<strong>Unmarked post as best answer</strong><br />» %1$s by %2$s',
 
-	'MARK_ANSWER'			=> 'Mark reply as best answer',
-	'MARK_ANSWER_CONFIRM'	=> 'Are you sure you want to mark this post as the best answer?',
+	'MARK_ANSWER'			=> 'Označit jako nejlepší odpověď',
+	'MARK_ANSWER_CONFIRM'	=> 'Opravdu si přejete označit tuto odpověď jako nejlepší?',
 
 	'TOPIC_FIRST_POST'	=> 'You cannot mark this post as the best answer as it is the first post of the topic.',
 	'TOPICS_ANSWERED'	=> 'Topics answered',
 
-	'UNMARK_ANSWER'			=> 'Unmark post as best answer',
-	'UNMARK_ANSWER_CONFIRM'	=> 'Are you sure you want to unmark this post as the best answer?',
+	'UNMARK_ANSWER'			=> 'Zrušit označení nejlepší odpovědi',
+	'UNMARK_ANSWER_CONFIRM'	=> 'Opravdu si přejete tuto odpověď více nezobrazovat jako nejlepší?',
 ));
