@@ -210,7 +210,7 @@ class listener implements EventSubscriberInterface
 	{
 		$sql_ary = $event['sql_ary'];
 
-		$sql_ary['SELECT'] .= ', t.bestanswer_id';
+		$sql_ary['SELECT'] .= ', ba_topics.bestanswer_id';
 
 		if (!$this->has_join($sql_ary['LEFT_JOIN'], POSTS_TABLE))
 		{
